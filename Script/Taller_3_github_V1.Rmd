@@ -1,0 +1,149 @@
+---
+title: "EVALUACIÓN DE IMPACTO - TALLER 2"
+author: "VIÁFARA MORALES, JORGE ELIECER"
+date: "2025-09-13"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+## Introduccion
+En su artículo, “The Miracle of Microfinance? Evidence form a Randomized Evaluation” , Banerjee, Duflo, Glennerster y Kinnan (2015) reportan en su artículo el impacto de la introducción de un producto de préstamo microcrédito estándar basado en grupos. Lo hacen diseñando una evaluación aleatoria en la región de Hyderabad, India. Para este contexto específico, los autores encuentran que la expansión de las instituciones de microfinanzas (IMF) no es una estrategia efectiva para el alivio rápido de la pobreza, lo que es contrario a lo que generalmente se afirma.
+
+Su tarea es replicar algunos de los resultados obtenidos por los autores y explicar cómo estos permitieron las conclusiones presentadas en el trabajo. Tenga en cuenta la última versión del paper, adjunto aquí junto con el conjunto de datos “data_endlines_1and2.dta”. En general, cuando requiera incluir variables de control, emplee las siguientes: 
+- población (area_pop_base), 
+- total de negocios (area_business_total_base), 
+- gasto promedio per capita (area_exp_pc_mean_base), 
+- fracción de jefes de hogar que saben leer y escribir (area_literate_head_base), 
+- fracción de adultos que saben leer y escribir (area_literate_base).
+
+Como su solución a este conjunto de problemas, proporcione un documento PDF autocontenido con sus respuestas y el do (u otro programa) que usó para resolverlo. Por favor, asegúrese de que esté claro tanto en su documento como en el do-file, a qué parte del conjunto de problemas corresponde cada solución y código. No seguir estas instrucciones básicas resultará en penalizaciones en su calificación.
+
+Se recomienda tener respuestas tan breves como sea posible. Ciertas preguntas, sobre todo aquellas que preguntan por su opinión, pueden no tener una única respuesta correcta. Así, lo importante es que argumenten de manera coherente.  
+
+## Primer Punto
+1. Al introducir el artículo, los autores analizaron las limitaciones y lineamientos de la investigación de microcrédito publicada.  
+
+### Solución Primer Punto
+
+a) ¿Cuáles son los problemas en la identificación del impacto del microcrédito si uno simplemente compara los que tienen microcrédito y los que no tienen microcrédito?
+
+**Respuesta:**
+
+b)¿Qué método utilizan los autores para identificar tal impacto?
+
+**Respuesta:**
+
+c) ¿Cómo resuelve ese método los problemas antes mencionados?
+Manual avanzado de R markdown: https://rpubs.com/ricardo/14631 
+
+**Respuesta:**
+
+## Segundo Punto
+2. Los autores reportan los resultados de estimar la siguiente ecuación:
+
+\begin{align}
+y_{ia} = \alfa+ \beta Treat_{ia} + X^T_{a}\gamma_1+\epsilon_{i} \quad \nonumber \\
+\end{align}
+
+Donde:
+- $y_{ia}$ es un resultado para el hogar $i$ en el área $a$.
+- $Treat_{ia}$ es una dicótoma que toma el valor de 1 si el hogar está ubicado en un área tratada.
+- $\beta$ es el efecto Intention to Treat (ITT). 
+- $X^T_{a}$ es un vector con dimensión.
+- $Kx1$ de variables de control.
+
+### Solución Segundo Punto
+
+a)	¿Cuál es la unidad de análisis en el estudio?
+
+**Respuesta:**
+
+b)	Replique la tabla 2 panel A, columnas 1 y 3 para mostrar el efecto de microfinanzas (ser tratado por el programa) en la obtención de más préstamos (acceso a créditos). Explique la intuición detrás de los resultados. Presente sus resultados con 4 cifras significativas.
+
+Pista: incluya la deuda presente en el área en línea base (área_debt_total_base) como un control adicional y lea las notas de la tabla para obtener exactamente las mismas estimaciones de los parámetros. (Use la función pweight con los pesos en “w1” para corregir por sobremuestreo y cluster para agrupar los errores a nivel de área)
+
+**Respuesta:**
+
+c)	Replique la tabla 3 panel A, columnas  3 y 4. Explique la intuición detrás de los resultados. Recuerde incluir la corrección por sobremuestreo y errores cluster a nivel de área.
+
+**Respuesta:**
+
+d)	Usando “any MFI” como definición del tratamiento y “Treated Area” como asignación aleatoria inicial, calcule la tasa de cumplimiento (compliance rate).  ¿Parece ser alta o baja? (Nota: incluya el ajuste para sobremuestreo)
+
+**Respuesta:**
+
+
+### Generalidades de R
+```{r}
+#Limpiar la consola
+cat("\f")
+
+#Limpiar el Global Environment
+rm(list = ls())
+
+#Incluir las librerias
+if(!require(pacman)) install.packages("pacman") ; require(pacman)
+p_load(haven,   #Leer archivos .dta
+        dplyr,   #Manipular datos
+        stargazer,  #Visualizar tablas de regresión
+        fixest,  #Calcular los efectos fijos
+        plm,  #Datos de panel
+       knitr,   #Visualizar tablas adicionales
+       ivreg  #Regresiones por variables instrumentales
+      )
+```
+
+### Transformación de datos en R
+```{r}
+# Definir URL del repositorio
+github_url <- "https://raw.githubusercontent.com/GeorgeWton1986/Eva_impacto_T2/main"
+# Cargar datos
+BD_0 <- read_dta(paste0(github_url, "/Data/oil_windfall_sin10perc.dta"))
+
+# Ver estructura de los datos
+glimpse(BD_0)
+head(BD_0)
+
+# Verificar los nombres de la columnas
+colnames(BD_0)
+```
+### Filtrar datos offshore
+```{r}
+
+# Filtrar para municipios costeros sin petróleo onshore
+
+#5. Para este taller, corran la regresión únicamente para municipios costeros (coastal = 1) y que reciben petróleo únicamente del mar (onshore = 0).
+
+BD_filtrada <- BD_0 %>%
+  filter(coastal == 1,
+         onshore == 0)
+
+print(paste("Observaciones después del filtro:", nrow(BD_filtrada)))
+```
+
+## Tercer Punto
+
+3.	Ahora quieres estimar el impacto de recibir efectivamente un microcrédito sobre 2 variables: i) el consumo total (total_exp_mo_pc_1) y ii) los beneficios del negocio (bizprofit_2).
+
+Para ello, se toma como variable de tratamiento efectivo a la dicótoma anymfi_1 que toma el valor de uno si el hogar recibió algún préstamo de cualquier IMF para la línea final 1 y cero en caso contrario. 
+
+Podemos tomar como instrumento el hecho de que la ubicación de los bancos fue aleatoria. Para esto, use como instrumento en sus estimaciones la asignación aleatoria (treatment).
+
+Finalmente, no incluya ningún control en sus estimaciones.
+
+### Solución tercer Punto
+
+a)	a)	¿Cuáles son los supuestos necesarios para que los estimadores de VI sean válidos (en el contexto del artículo)?
+
+**Respuesta:**
+
+b)	Para cada una de las dos variables, estime el efecto Local Average Treament Effect (LATE) de obtener un préstamo, a través del método de Variable Instrumental. Estime también el ITT.  Para cada tipo de efecto (LATE e ITT) presente una tabla con sus estimaciones y sus respectivos errores estándar. Interprete sus resultados, ¿Cuál es la diferencia en la interpretación de los dos tipos de efecto? Discuta. (Nota: no incluya controles, solo ajuste para sobremuestreo y clusterice errores.)
+
+**Respuesta:**
+
+c)	¿Cuál debería ser la relación matemática entre la tasa de cumplimiento, el LATE y el ITT? ¿Parece mantenerse esta relación en sus resultados? En una tabla presente sus cálculos de LATE matemáticos/manuales y discuta. 
+
+**Respuesta:**
+
