@@ -86,7 +86,7 @@ p_load(haven,   #Leer archivos .dta
         plm,  #Datos de panel
        knitr,   #Visualizar tablas adicionales
        ivreg,  #Regresiones por variables instrumentales
-       broom, #Extraer resultados de regresiones
+       broom #Extraer resultados de regresiones
       )
 ```
 
@@ -108,7 +108,6 @@ colnames(BD_0)
 ### Desarrollo 
 ```{r}
 #filtrar los datos de endline 1
-
 el1_data <- BD_0 %>% filter(sample1 == 1)
 
 #Verificar que tenemos los datos correctos
@@ -117,14 +116,13 @@ cat("Observaciones en endline 1:", nrow(el1_data), "\n")
 #Variables de control especificadas en el taller
 controls_formula <- "area_pop_base + area_business_total_base + area_exp_pc_mean_base + area_literate_head_base + area_literate_base + area_debt_total_base"
 
-#Regresión columna 1 spandana_1
-
+#Regresión Tabla 2 columna 1 spandana_1
 mod_1 <- feols(as.formula(paste("spandana_1 ~ treatment +", controls_formula)), 
                data = el1_data, 
                weights = ~w1, 
                cluster = ~areaid)
 
-#Regresión columna 3 anymfi_1
+#Regresión Tabla 2 columna 3 anymfi_1
 mod_3 <- feols(as.formula(paste("anymfi_1 ~ treatment +", controls_formula)), 
                     data = el1_data, 
                     weights = ~w1,
@@ -152,20 +150,76 @@ results_1_3 <- data.frame(
 cat("\n=== RESULTADOS PREGUNTA 2b ===\n")
 print(results_1_3)
 
-# Tabla más elegante con stargazer (opcional)
-stargazer(mod_1, mod_3,
-          title = "Tabla 2, Panel A - Efecto del Tratamiento en Acceso a Crédito",
-          dep.var.labels = c("Préstamo Spandana", "Cualquier MFI"),
-          covariate.labels = "Área Tratada",
-          keep = "treatment",
-          digits = 3,
-          type = "text")
+etable(mod_1, mod_3,
+       title = "Tabla 2, Panel A - Efecto del Tratamiento en Acceso a Crédito",
+       headers = c("Spandana", "Any MFI"),
+       keep = "treatment",
+       digits = 4)
 
 ```
+**Intuición sobre los resultados (Spandana):** De acuerdo con los resultados obtenidos, incluir una institución que ofrezca microcréditos en el area del tratamiento aumenta la probabilidad de gestionar y recibir un préstamo. Es decir, por su cercania y el voz a voz entre individuos cercanos generan el efecto positivo de tener un 12.7 puntos porcentuales más de probabilidad de recibir un crédito de Spandana en comparacion a las areas que no estan tratadas. Presenta una sigficancia estadistica al 1%.
+
+**Intuición sobre los resultados (Any MFI):** Conforme a los resultados presentados, la solicitud y obtención de microcreditos en la áreas de tratamiento. Los hogares en las áreas del tratamiento tienen una probabilidad de 8.4 puntos porcentuales de solicitud de creditos a cualquier IMF. Presenta una sigficancia estadistica al 1%.
+
+**En conclusión:** La diferencia entre columnas 1 y 3 sugiere que algunas personas que habrían tomado préstamos de otras MFIs ahora los toman de Spandana. Además, El efecto neto en 'cualquier MFI' es menor, indicando sustitución.
 
 c)	Replique la tabla 3 panel A, columnas  3 y 4. Explique la intuición detrás de los resultados. Recuerde incluir la corrección por sobremuestreo y errores cluster a nivel de área.
 
 **Respuesta:**
+```{r}
+
+# Función para calcular errores estándar clusterizados
+cluster_se <- function(model, cluster_var) {
+  require(sandwich)
+  require(lmtest)
+  vcov_cluster <- vcovCL(model, cluster = cluster_var)
+  coeftest(model, vcov = vcov_cluster)
+}
+
+#Regresión Tabla 3 Expenses Columna 3
+mod_3_3 <- lm(bizexpense_1 ~ treatment + area_pop_base + area_business_total_base + 
+                   area_exp_pc_mean_base + area_literate_head_base + 
+                   area_literate_base, 
+                   data = el1_data, 
+                  weights = el1_data$w1)
+
+#Regresión Tabla 3 profit Columna 4
+mod_3_4 <- lm(bizprofit_1 ~ treatment + area_pop_base + area_business_total_base + 
+                 area_exp_pc_mean_base + area_literate_head_base + 
+                 area_literate_base, 
+                 data = el1_data, 
+                weights = el1_data$w1)
+
+#Errores clustereados
+results_expenses <- cluster_se(mod_3_3, el1_data$areaid)
+results_profit <- cluster_se(mod_3_4, el1_data$areaid)
+
+round(results_expenses[2,], 4)
+round(results_profit[2,], 4)
+
+#Extraer información de manera organizada
+coef_expenses <- round(coef(mod_3_3)["treatment"], 4)
+se_expenses <- round(sqrt(diag(vcovCL(mod_3_3, cluster = el1_data$areaid)))["treatment"], 4)
+pval_expenses <- round(results_expenses[2,4], 4)
+
+coef_profit <- round(coef(mod_3_4)["treatment"], 4)
+se_profit <- round(sqrt(diag(vcovCL(mod_3_4, cluster = el1_data$areaid)))["treatment"], 4)
+pval_profit <- round(results_profit[2,4], 4)
+
+#Tabla de resultados
+results_2c <- data.frame(
+  Variable = c("Gastos Negocio (Col 3)", "Ganancias Negocio (Col 4)"),
+  Coeficiente = c(coef_expenses, coef_profit),
+  Error_Estandar = c(se_expenses, se_profit),
+  P_valor = c(pval_expenses, pval_profit),
+  Observaciones = c(nobs(mod_3_3), nobs(mod_3_4))
+)
+
+cat("\n=== RESULTADOS PREGUNTA 2c ===\n")
+print(results_2c)
+
+```
+
 
 d)	Usando “any MFI” como definición del tratamiento y “Treated Area” como asignación aleatoria inicial, calcule la tasa de cumplimiento (compliance rate).  ¿Parece ser alta o baja? (Nota: incluya el ajuste para sobremuestreo)
 
