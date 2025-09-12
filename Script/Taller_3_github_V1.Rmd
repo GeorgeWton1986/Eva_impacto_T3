@@ -29,16 +29,17 @@ Se recomienda tener respuestas tan breves como sea posible. Ciertas preguntas, s
 
 a) ¿Cuáles son los problemas en la identificación del impacto del microcrédito si uno simplemente compara los que tienen microcrédito y los que no tienen microcrédito?
 
-**Respuesta:**
+**Respuesta:** Se identificaron dos problemas en la identificación. El primero, autoselección de la muesta dado que los clientes se autoseleccionan para solicitar un crédito. El segundo, la selección de áreas en las que operan las organizaciones de microfinanzas. 
 
 b)¿Qué método utilizan los autores para identificar tal impacto?
 
-**Respuesta:**
+**Respuesta:** Los autores estimaron el impacto de las microfinanzas a partir del método Intención de Tratar (ITT).
 
 c) ¿Cómo resuelve ese método los problemas antes mencionados?
-Manual avanzado de R markdown: https://rpubs.com/ricardo/14631 
 
-**Respuesta:**
+**Respuesta:** El método de Intención de Tratar (ITT) permite resolver bajo comparaciones simples de los promedios en las áreas de tratamiento y las áreas de comparación, promediadas entre prestatarios y como no prestatarios. Por lo tanto, el ITT midel el efecto promedio de un acceso mas facíl a las microfinanzas.
+
+Manual avanzado de R markdown: https://rpubs.com/ricardo/14631 
 
 ## Segundo Punto
 2. Los autores reportan los resultados de estimar la siguiente ecuación:
@@ -58,22 +59,15 @@ Donde:
 
 a)	¿Cuál es la unidad de análisis en el estudio?
 
-**Respuesta:**
+**Respuesta:** La unidad de análisis del estudio es $y_{ia}$ es un resultado para el hogar $i$ en el área $a$.
+
+Siga la ecuación (1) y use la base de datos “data_endlines_1and2.dta" para realizar las siguientes tareas:
 
 b)	Replique la tabla 2 panel A, columnas 1 y 3 para mostrar el efecto de microfinanzas (ser tratado por el programa) en la obtención de más préstamos (acceso a créditos). Explique la intuición detrás de los resultados. Presente sus resultados con 4 cifras significativas.
 
 Pista: incluya la deuda presente en el área en línea base (área_debt_total_base) como un control adicional y lea las notas de la tabla para obtener exactamente las mismas estimaciones de los parámetros. (Use la función pweight con los pesos en “w1” para corregir por sobremuestreo y cluster para agrupar los errores a nivel de área)
 
 **Respuesta:**
-
-c)	Replique la tabla 3 panel A, columnas  3 y 4. Explique la intuición detrás de los resultados. Recuerde incluir la corrección por sobremuestreo y errores cluster a nivel de área.
-
-**Respuesta:**
-
-d)	Usando “any MFI” como definición del tratamiento y “Treated Area” como asignación aleatoria inicial, calcule la tasa de cumplimiento (compliance rate).  ¿Parece ser alta o baja? (Nota: incluya el ajuste para sobremuestreo)
-
-**Respuesta:**
-
 
 ### Generalidades de R
 ```{r}
@@ -91,16 +85,17 @@ p_load(haven,   #Leer archivos .dta
         fixest,  #Calcular los efectos fijos
         plm,  #Datos de panel
        knitr,   #Visualizar tablas adicionales
-       ivreg  #Regresiones por variables instrumentales
+       ivreg,  #Regresiones por variables instrumentales
+       broom, #Extraer resultados de regresiones
       )
 ```
 
 ### Transformación de datos en R
 ```{r}
 # Definir URL del repositorio
-github_url <- "https://raw.githubusercontent.com/GeorgeWton1986/Eva_impacto_T2/main"
+github_url <- "https://raw.githubusercontent.com/GeorgeWton1986/Eva_impacto_T3/main"
 # Cargar datos
-BD_0 <- read_dta(paste0(github_url, "/Data/oil_windfall_sin10perc.dta"))
+BD_0 <- read_dta(paste0(github_url, "/Data/data_1.dta"))
 
 # Ver estructura de los datos
 glimpse(BD_0)
@@ -109,19 +104,73 @@ head(BD_0)
 # Verificar los nombres de la columnas
 colnames(BD_0)
 ```
-### Filtrar datos offshore
+
+### Desarrollo 
 ```{r}
+#filtrar los datos de endline 1
 
-# Filtrar para municipios costeros sin petróleo onshore
+el1_data <- BD_0 %>% filter(sample1 == 1)
 
-#5. Para este taller, corran la regresión únicamente para municipios costeros (coastal = 1) y que reciben petróleo únicamente del mar (onshore = 0).
+#Verificar que tenemos los datos correctos
+cat("Observaciones en endline 1:", nrow(el1_data), "\n")
 
-BD_filtrada <- BD_0 %>%
-  filter(coastal == 1,
-         onshore == 0)
+#Variables de control especificadas en el taller
+controls_formula <- "area_pop_base + area_business_total_base + area_exp_pc_mean_base + area_literate_head_base + area_literate_base + area_debt_total_base"
 
-print(paste("Observaciones después del filtro:", nrow(BD_filtrada)))
+#Regresión columna 1 spandana_1
+
+mod_1 <- feols(as.formula(paste("spandana_1 ~ treatment +", controls_formula)), 
+               data = el1_data, 
+               weights = ~w1, 
+               cluster = ~areaid)
+
+#Regresión columna 3 anymfi_1
+mod_3 <- feols(as.formula(paste("anymfi_1 ~ treatment +", controls_formula)), 
+                    data = el1_data, 
+                    weights = ~w1,
+                    cluster = ~areaid)
+
+#Extraer coeficientes y errores estándar
+coef_mod_1 <- round(coef(mod_1)["treatment"], 3)
+se_mod_1 <- round(se(mod_1)["treatment"], 3)
+pval_mod_1 <- round(pvalue(mod_1)["treatment"], 3)
+
+coef_mod_3 <- round(coef(mod_3)["treatment"], 3)
+se_mod_3 <- round(se(mod_3)["treatment"], 3)
+pval_mod_3 <- round(pvalue(mod_3)["treatment"], 3)
+
+# Crear tabla de resultados
+results_1_3 <- data.frame(
+  Variable = c("Spandana (Columna 1)", "Any MFI (Columna 3)"),
+  Coeficiente = c(coef_mod_1, coef_mod_3),
+  Error_Estandar = c(se_mod_1, se_mod_3),
+  P_valor = c(pval_mod_1, pval_mod_3),
+  Observaciones = c(nobs(mod_1), nobs(mod_3))
+)
+
+# Mostrar tabla
+cat("\n=== RESULTADOS PREGUNTA 2b ===\n")
+print(results_1_3)
+
+# Tabla más elegante con stargazer (opcional)
+stargazer(mod_1, mod_3,
+          title = "Tabla 2, Panel A - Efecto del Tratamiento en Acceso a Crédito",
+          dep.var.labels = c("Préstamo Spandana", "Cualquier MFI"),
+          covariate.labels = "Área Tratada",
+          keep = "treatment",
+          digits = 3,
+          type = "text")
+
 ```
+
+c)	Replique la tabla 3 panel A, columnas  3 y 4. Explique la intuición detrás de los resultados. Recuerde incluir la corrección por sobremuestreo y errores cluster a nivel de área.
+
+**Respuesta:**
+
+d)	Usando “any MFI” como definición del tratamiento y “Treated Area” como asignación aleatoria inicial, calcule la tasa de cumplimiento (compliance rate).  ¿Parece ser alta o baja? (Nota: incluya el ajuste para sobremuestreo)
+
+**Respuesta:**
+
 
 ## Tercer Punto
 
