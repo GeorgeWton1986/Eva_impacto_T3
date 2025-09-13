@@ -29,7 +29,7 @@ Se recomienda tener respuestas tan breves como sea posible. Ciertas preguntas, s
 
 a) ¿Cuáles son los problemas en la identificación del impacto del microcrédito si uno simplemente compara los que tienen microcrédito y los que no tienen microcrédito?
 
-**Respuesta:** Se identificaron dos problemas en la identificación. El primero, autoselección de la muesta dado que los clientes se autoseleccionan para solicitar un crédito. El segundo, la selección de áreas en las que operan las organizaciones de microfinanzas. 
+**Respuesta:** Se presentaron dos problemas en la identificación. El primero, autoselección de la muestra dado que los clientes se autoseleccionan para solicitar un crédito. El segundo, la selección de áreas en las que operan las organizaciones de microfinanzas. 
 
 b)¿Qué método utilizan los autores para identificar tal impacto?
 
@@ -37,7 +37,7 @@ b)¿Qué método utilizan los autores para identificar tal impacto?
 
 c) ¿Cómo resuelve ese método los problemas antes mencionados?
 
-**Respuesta:** El método de Intención de Tratar (ITT) permite resolver bajo comparaciones simples de los promedios en las áreas de tratamiento y las áreas de comparación, promediadas entre prestatarios y como no prestatarios. Por lo tanto, el ITT midel el efecto promedio de un acceso mas facíl a las microfinanzas.
+**Respuesta:** El método de Intención de Tratar (ITT) permite resolver bajo comparaciones simples de los promedios en las áreas de tratamiento y las áreas de comparación, promediadas entre prestatarios y como no prestatarios. Por lo tanto, el ITT mide el efecto promedio de un acceso más facíl a las microfinanzas.
 
 Manual avanzado de R markdown: https://rpubs.com/ricardo/14631 
 
@@ -59,7 +59,7 @@ Donde:
 
 a)	¿Cuál es la unidad de análisis en el estudio?
 
-**Respuesta:** La unidad de análisis del estudio es $y_{ia}$ es un resultado para el hogar $i$ en el área $a$.
+**Respuesta:** La unidad de análisis del estudio es $y_{ia}$ es el resultado para el hogar $i$ en el área $a$.
 
 Siga la ecuación (1) y use la base de datos “data_endlines_1and2.dta" para realizar las siguientes tareas:
 
@@ -163,11 +163,11 @@ etable(mod_1, mod_3,
        digits = 4)
 
 ```
-**Intuición sobre los resultados (Spandana):** De acuerdo con los resultados obtenidos, incluir una institución que ofrezca microcréditos en el area del tratamiento aumenta la probabilidad de gestionar y recibir un préstamo. Es decir, por su cercania y el voz a voz entre individuos cercanos generan el efecto positivo de tener un 12.7 puntos porcentuales más de probabilidad de recibir un crédito de Spandana en comparacion a las areas que no estan tratadas. Presenta una sigficancia estadistica al 1%.
+**Intuición sobre los resultados (Spandana):** De acuerdo con los resultados obtenidos, incluir una institución que ofrezca microcréditos en el área del tratamiento aumenta la probabilidad de gestionar y recibir un préstamo. Es decir, por su cercania y el voz a voz entre individuos cercanos generan el efecto positivo de tener un 12.7 puntos porcentuales más de probabilidad de recibir un crédito de Spandana en comparación con las areas que no estan tratadas. Presenta una significancia estadística al 1%.
 
-**Intuición sobre los resultados (Any MFI):** Conforme a los resultados presentados, la solicitud y obtención de microcreditos en la áreas de tratamiento. Los hogares en las áreas del tratamiento tienen una probabilidad de 8.4 puntos porcentuales de solicitud de creditos a cualquier IMF. Presenta una sigficancia estadistica al 1%.
+**Intuición sobre los resultados (Any MFI):** Conforme a los resultados presentados, la solicitud y obtención de microcréditos en las áreas de tratamiento, los hogares tienen una probabilidad de 8.4 puntos porcentuales de solicitud de créditos a cualquier IMF. Presenta una significancia estadística al 1%.
 
-**En conclusión:** La diferencia entre columnas 1 y 3 sugiere que algunas personas que habrían tomado préstamos de otras MFIs ahora los toman de Spandana. Además, El efecto neto en 'cualquier MFI' es menor, indicando sustitución.
+**En conclusión:** La diferencia entre columnas 1 y 3 sugiere que algunas personas que habrían tomado préstamos de otras IMFs ahora los toman de Spandana. Además, El efecto neto en 'cualquier IMF' es menor, indicando sustitución.
 
 c)	Replique la tabla 3 panel A, columnas  3 y 4. Explique la intuición detrás de los resultados. Recuerde incluir la corrección por sobremuestreo y errores cluster a nivel de área.
 
@@ -220,15 +220,15 @@ etable(mod_3_3, mod_3_4,
 
 ```
 
-**Intuición sobre los resultados (Expenses):** El resultado de la varible área tratada indica la diferencia promedio los gastos promedios mensuales de los negocios entre los tratados y el area de control. La significancia estadistica sugiere que la variable que el microcrédito no tuvo un impacto en los gastos de los negocios. Es decir, los hogares gastaron 216 rupias más que los hogares en la areas de control.
+**Intuición sobre los resultados (Expenses):** El resultado de la varible área tratada indica la diferencia promedio los gastos promedios mensuales de los negocios entre los tratados y el área de control. La significancia estadística sugiere que la variable que el microcrédito no tuvo un impacto en los gastos de los negocios. Es decir, los hogares gastaron 216 rupias más que los hogares en la áreas de control.
 
-**Intuición sobre los resultados (Profit):** La utilidad de los negocios de los hogares en las áreas tratadas represento un cambio de 377 rupias en comparación a aquellos hogares en el areas de control. Sin embargo, la significancia estadística indica que no es significante. Por lo tanto, Las utilidades de los negocios no representan expancion de oportunidades para los negocios, debido a que el consumo total promedio de los hogares es aproximadamente 6.500 rupias al mes.
+**Intuición sobre los resultados (Profit):** La utilidad de los negocios de los hogares en las áreas tratadas representó un cambio de 377 rupias en comparación a aquellos hogares en el áreas de control. Sin embargo, el resultado no es significante estadísticamente. Por lo tanto, las utilidades de los negocios no representan expansión de oportunidades para los negocios, debido a que el consumo total promedio de los hogares es aproximadamente 6.500 rupias al mes.
 
-**En conclusión:** La primera encuenta Endline 1, no presenta evidencia sobre el impacto estadisticos significativo de acceso al microcrédito por lo hogares en los gastos y utilidades de los negocios.
+**En conclusión:** La primera encuenta Endline 1, no presenta evidencia sobre el impacto estadísticos significativo de acceso al microcrédito por lo hogares en los gastos y utilidades de los negocios.
 
 d)	Usando “any MFI” como definición del tratamiento y “Treated Area” como asignación aleatoria inicial, calcule la tasa de cumplimiento (compliance rate).  ¿Parece ser alta o baja? (Nota: incluya el ajuste para sobremuestreo)
 
-**Respuesta:** La relación de cumplimiento (compliance rate) esta midiendo la efectividad del experimiento en terminos de la diferencias entre $compliance = P(tomar MFI | área tratada) - P(tomar MFI | área control)$. Se explica como la fracción adicional de hogares que tomaron los microcreditos dado que estan tratados. Por lo tanto, si la relación de cumplimiento es cercano a 1, significa que casi todos los hogares en las áreas tratadas tomaron microcréditos, mientras que si es cercano a 0, indica que el experimento tuvo poco impacto en la toma de microcréditos.
+**Respuesta:** La relación de cumplimiento (compliance rate) esta midiendo la efectividad del experimiento en términos de la diferencias entre $compliance = P(tomar MFI | área tratada) - P(tomar MFI | área control)$. Se explica como la fracción adicional de hogares que tomaron los microcréditos dado que estan tratados. Por lo tanto, si la relación de cumplimiento es cercano a 1, significa que casi todos los hogares en las áreas tratadas tomaron microcréditos, mientras que si es cercano a 0, indica que el experimento tuvo poco impacto en la toma de microcréditos.
 
 ```{r warning=FALSE, message=FALSE}
 #Calcular tasa de cumplimiento
@@ -244,7 +244,7 @@ compliance_rate_df <- el1_data %>%
 # cat("\n=== Tasa de Cumplimiento ===\n")
 print(compliance_rate_df)
 ```
-Según los resultados, la tasa de cumpliento es de 0.074 o 7.4%, representa un valor bajo. Esto se interpreta como solo 7 hogares de 100 obtuvieron acceso a microcréditos debido al experimento. Además, 18.1% de los hogares de las areas de control obtuvieron MFI de otras fuentes y el 25.5% tomaron prestamos de MFI. 
+Según los resultados, la tasa de cumpliento es de 0.074 o 7.4%, representa un valor bajo. Esto se interpreta como solo 7 hogares de 100 obtuvieron acceso a microcréditos debido al experimento. Además, 18.1% de los hogares de las áreas de control obtuvieron créditos de otras fuentes y el 25.5% tomaron prestamos de IMF. 
 
 ## Tercer Punto
 
@@ -265,7 +265,7 @@ $Cov(anymfi\_1,treatment)\neq 0$, **ii) Exclusión** $Cov(\epsilon, treatment) =
 
 b)	Para cada una de las dos variables, estime el efecto Local Average Treament Effect (LATE) de obtener un préstamo, a través del método de Variable Instrumental. Estime también el ITT.  Para cada tipo de efecto (LATE e ITT) presente una tabla con sus estimaciones y sus respectivos errores estándar. Interprete sus resultados, ¿Cuál es la diferencia en la interpretación de los dos tipos de efecto? Discuta. (Nota: no incluya controles, solo ajuste para sobremuestreo y clusterice errores.)
 
-**Respuesta:** Vamos a explicar los terminos ITT (Intent to Treat), es el efecto de ser asignado al tratamiento, independiente si se recibe el tratamiento. El LATE (Local Average Treatment Effect), es el efecto causal del tratamiento en aquellos que cumplen con el tratamiento debido a la asignación aleatoria.
+**Respuesta:** Vamos a explicar los términos ITT (Intent to Treat), es el efecto de ser asignado al tratamiento, independiente si se recibe el tratamiento. El LATE (Local Average Treatment Effect), es el efecto causal del tratamiento en aquellos que cumplen con el tratamiento debido a la asignación aleatoria.
 ```{r warning=FALSE, message=FALSE}
 
 #i) ITT - Consumo Total
@@ -350,9 +350,9 @@ stargazer(late_consumption, late_profit,
 
 ```
 
-**Interpretación de Resultados:** En términos practicos el efecto ITT indica que el acceso al microcredito en una zona que facilita el credito (Zona Tratada), es independiente de si el hogar efectivamente tome el credito. La interpretacion cuantitativa del ITT, presenta un aumento a consumir en promedio 38 rupias mensuales. Además, puede facilitar un aumento en las ganancias del negocio en 585 rupias mensuales en promedio debido al acceso al microcrédito. Sin embargo, ambos resultados no son estadisticamente significativos, resultados que coinciden con los autores.
+**Interpretación de Resultados:** En términos prácticos el efecto ITT indica que el acceso al microcrédito en una zona que facilita el crédito (Zona Tratada), es independiente de si el hogar efectivamente tome el crédito. La interpretación cuantitativa del ITT, presenta un aumento a consumir en promedio 38 rupias mensuales. Además, puede facilitar un aumento en las ganancias del negocio en 585 rupias mensuales en promedio debido al acceso al microcrédito. Sin embargo, ambos resultados no son estadisticamente significativos, resultados que coinciden con los autores.
 
-De otro lado, el efecto LATE bajo condiciones de aleatoriedad estima que tomar un microcrédito aumenta el consumo en 460 rupias mensuales en promedio y aumenta las ganancias del negocio en 6585 rupias mensuales en promedio. Por lo tanto, el LATE mide el efecto causal de tomar el credito solo para aquellos "compliers". Es decir, aquellos hogares que toman el MFI porque su acceso fue facilitado por la asignación aleatoría.
+De otro lado, el efecto LATE bajo condiciones de aleatoriedad estima que tomar un microcrédito aumenta el consumo en 460 rupias mensuales y aumenta las ganancias del negocio en 6585 rupias mensuales en promedio para ambos casos. Por lo tanto, el LATE mide el efecto causal de tomar el credito solo para aquellos "compliers". Es decir, aquellos hogares que toman el crédito porque su acceso fue facilitado por la asignación aleatoría.
 
 c)	¿Cuál debería ser la relación matemática entre la tasa de cumplimiento, el LATE y el ITT? ¿Parece mantenerse esta relación en sus resultados? En una tabla presente sus cálculos de LATE matemáticos/manuales y discuta. 
 
@@ -388,4 +388,4 @@ tabla_verificacion <- data.frame(
 
 head(tabla_verificacion)
 ```
-**Interpretación:** Los resultado confirman la relación matemática $LATE = ITT / Compliance Rate$. Sin embargo, las diferencias indican que el efector del muestreo y los pesos pueden afectar las estimaciones por OLS y VI. Además, las observaciones de LATE VI son menos para el consumo total. En general, se puede concluir que el Microcredito tiene efectos causales (LATE) grandes pero solo para una minoria de hogares como lo muestra el compliance rate bajo.
+**Interpretación:** Los resultado confirman la relación matemática $LATE = ITT / Compliance Rate$. Sin embargo, las diferencias indican que el efecto del muestreo y los pesos pueden afectar las estimaciones por OLS y VI. Además, las observaciones de LATE VI son menos para el consumo total. En general, se puede concluir que el Microcrédito tiene efectos causales (LATE) grandes pero solo para una minoria de hogares como lo muestra el compliance rate bajo.
