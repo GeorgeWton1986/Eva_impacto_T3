@@ -45,7 +45,7 @@ Manual avanzado de R markdown: https://rpubs.com/ricardo/14631
 2. Los autores reportan los resultados de estimar la siguiente ecuación:
 
 \begin{align}
-y_{ia} = \alfa+ \beta Treat_{ia} + X^T_{a}\gamma_1+\epsilon_{i} \quad \nonumber \\
+y_{ia} = \alpha+ \beta Treat_{ia} + X^T_{a}\gamma_1+\epsilon_{i} \quad \nonumber \\
 \end{align}
 
 Donde:
@@ -89,7 +89,8 @@ p_load(haven,   #Leer archivos .dta
       broom, #Extraer resultados de regresiones
       AER,    #Regresiones por variables instrumentales
       sandwich, #Errores estándar robustos
-      lmtest  #Pruebas estadísticas
+      lmtest,  #Pruebas estadísticas
+      kableExtra #Tablas avanzadas
       )
 ```
 
@@ -101,15 +102,15 @@ github_url <- "https://raw.githubusercontent.com/GeorgeWton1986/Eva_impacto_T3/m
 BD_0 <- read_dta(paste0(github_url, "/Data/data_1.dta"))
 
 # Ver estructura de los datos
-glimpse(BD_0)
-head(BD_0)
+#glimpse(BD_0)
+#head(BD_0)
 
 # Verificar los nombres de la columnas
 colnames(BD_0)
 ```
 
 ### Desarrollo 
-```{r}
+```{r warning=FALSE, message=FALSE}
 #filtrar los datos de endline 1
 el1_data <- BD_0 %>% filter(sample1 == 1)
 
@@ -117,7 +118,9 @@ el1_data <- BD_0 %>% filter(sample1 == 1)
 cat("Observaciones en endline 1:", nrow(el1_data), "\n")
 
 #Variables de control especificadas
-controls_formula <- "area_pop_base + area_business_total_base + area_exp_pc_mean_base + area_literate_head_base + area_literate_base + area_debt_total_base"
+controls_formula <- "area_pop_base + area_business_total_base + 
+                      area_exp_pc_mean_base + area_literate_head_base + 
+                      area_literate_base + area_debt_total_base"
 
 #Regresión Tabla 2 columna 1 spandana_1
 mod_1 <- feols(as.formula(paste("spandana_1 ~ treatment +", controls_formula)), 
@@ -149,9 +152,9 @@ results_1_3 <- data.frame(
   Observaciones = c(nobs(mod_1), nobs(mod_3))
 )
 
-#Mostrar tabla
-cat("\n=== RESULTADOS PREGUNTA 2b ===\n")
-print(results_1_3)
+# #Mostrar tabla
+# cat("\n=== RESULTADOS PREGUNTA 2b ===\n")
+# print(results_1_3)
 
 etable(mod_1, mod_3,
        title = "Tabla 2, Panel A - Efecto del Tratamiento en Acceso a Crédito",
@@ -169,9 +172,11 @@ etable(mod_1, mod_3,
 c)	Replique la tabla 3 panel A, columnas  3 y 4. Explique la intuición detrás de los resultados. Recuerde incluir la corrección por sobremuestreo y errores cluster a nivel de área.
 
 **Respuesta:** La tabla 3 panel A, presenta los resultados de la primera encuesta Endline 1. Los datos representan los impactos de acceso al microcrédito en emprendimientos.
-```{r}
+
+```{r warning=FALSE, message=FALSE}
 #Variables de control especificadas
-controls_formula_1 <- "area_pop_base + area_business_total_base + area_exp_pc_mean_base + area_literate_head_base + area_literate_base"
+controls_formula_1 <- "area_pop_base + area_business_total_base + area_exp_pc_mean_base + 
+                        area_literate_head_base + area_literate_base"
 
 #Regresión Tabla 3 Expenses Columna 3
 mod_3_3 <- feols(as.formula(paste("bizexpense_1 ~ treatment+", controls_formula_1)), 
@@ -202,8 +207,8 @@ results_2c <- data.frame(
   Observaciones = c(nobs(mod_3_3), nobs(mod_3_4))
 )
 
-cat("\n=== RESULTADOS PREGUNTA 2c ===\n")
-print(results_2c)
+# cat("\n=== RESULTADOS PREGUNTA 2c ===\n")
+# print(results_2c)
 
 #Mostrar tabla
 
@@ -225,7 +230,7 @@ d)	Usando “any MFI” como definición del tratamiento y “Treated Area” co
 
 **Respuesta:** La relación de cumplimiento (compliance rate) esta midiendo la efectividad del experimiento en terminos de la diferencias entre $compliance = P(tomar MFI | área tratada) - P(tomar MFI | área control)$. Se explica como la fracción adicional de hogares que tomaron los microcreditos dado que estan tratados. Por lo tanto, si la relación de cumplimiento es cercano a 1, significa que casi todos los hogares en las áreas tratadas tomaron microcréditos, mientras que si es cercano a 0, indica que el experimento tuvo poco impacto en la toma de microcréditos.
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 #Calcular tasa de cumplimiento
 compliance_rate_df <- el1_data %>%
   summarise(
@@ -236,7 +241,7 @@ compliance_rate_df <- el1_data %>%
     #Tasa de cumplimiento = diferencia
     compliance = treated_take_mfi - control_take_mfi
   )
-cat("\n=== Tasa de Cumplimiento ===\n")
+# cat("\n=== Tasa de Cumplimiento ===\n")
 print(compliance_rate_df)
 ```
 Según los resultados, la tasa de cumpliento es de 0.074 o 7.4%, representa un valor bajo. Esto se interpreta como solo 7 hogares de 100 obtuvieron acceso a microcréditos debido al experimento. Además, 18.1% de los hogares de las areas de control obtuvieron MFI de otras fuentes y el 25.5% tomaron prestamos de MFI. 
@@ -255,12 +260,13 @@ Finalmente, no incluya ningún control en sus estimaciones.
 
 a) ¿Cuáles son los supuestos necesarios para que los estimadores de VI sean válidos (en el contexto del artículo)?
 
-**Respuesta:** Los supuestos necesesarios para que los estimadores de VI sean validos son, i) Relevancia del instrumento $Cov(anymfi_1,treatment)\neq 0 $, ii) Exclusión $Cov(\epsilon, treatment) = 0 $, iii) Monotonicidad $anymfi_1(1) \geq anymfi_1(0)$ y iv) Independencia $treatment \perp (anymfi_1(0), anymfi_1(1), \epsilon)$.
+**Respuesta:** Los supuestos necesesarios para que los estimadores de VI sean validos son, **i) Relevancia del instrumento** 
+$Cov(anymfi\_1,treatment)\neq 0$, **ii) Exclusión** $Cov(\epsilon, treatment) = 0$, **iii) Monotonicidad** $anymfi\_1(1) \geq anymfi\_1(0)$ y **iv) Independencia** $treatment \perp (anymfi\_1(0), anymfi\_1(1), \epsilon)$.
 
 b)	Para cada una de las dos variables, estime el efecto Local Average Treament Effect (LATE) de obtener un préstamo, a través del método de Variable Instrumental. Estime también el ITT.  Para cada tipo de efecto (LATE e ITT) presente una tabla con sus estimaciones y sus respectivos errores estándar. Interprete sus resultados, ¿Cuál es la diferencia en la interpretación de los dos tipos de efecto? Discuta. (Nota: no incluya controles, solo ajuste para sobremuestreo y clusterice errores.)
 
 **Respuesta:** Vamos a explicar los terminos ITT (Intent to Treat), es el efecto de ser asignado al tratamiento, independiente si se recibe el tratamiento. El LATE (Local Average Treatment Effect), es el efecto causal del tratamiento en aquellos que cumplen con el tratamiento debido a la asignación aleatoria.
-```{r}
+```{r warning=FALSE, message=FALSE}
 
 #i) ITT - Consumo Total
 itt_consumption <- lm(total_exp_mo_pc_1 ~ treatment, 
@@ -307,41 +313,43 @@ itt_prof_se <- sqrt(diag(vcov_itt_prof))["treatment"]
 late_prof_coef <- coef(late_profit)["anymfi_1"]
 late_prof_se <- sqrt(diag(vcov_late_prof))["anymfi_1"]
 
+```
 
+```{r warning=FALSE, message=FALSE}
 # Crear tabla de resultados combinados ITT y LATE
-stargazer(itt_consumption, late_consumption, itt_profit, late_profit,
-          title = "Comparación ITT vs LATE",
+
+# Tabla ITT
+stargazer(itt_consumption, itt_profit,
+          title = "Efectos Intent-to-Treat (ITT)",
           dep.var.labels = c("Consumo Total", "Ganancias Negocio"),
-          column.labels = c("ITT", "LATE", "ITT", "LATE"),
-          model.numbers = FALSE,
-          
-          # Incluir solo el coeficiente de interés
-          keep = c("treatment", "anymfi_1"),
-          covariate.labels = c("Treatment (ITT)", "Any MFI (LATE)"),
-          
-          # Errores estándar clustereados
-          se = list(sqrt(diag(vcov_itt_cons))[2],     # ITT consumo
-                    sqrt(diag(vcov_late_cons))[2],    # LATE consumo  
-                    sqrt(diag(vcov_itt_prof))[2],     # ITT ganancias
-                    sqrt(diag(vcov_late_prof))[2]),   # LATE ganancias
-          
-          # Formato
-          digits = 2,
+          keep = "treatment",
+          covariate.labels = "Área Tratada",
+          se = list(sqrt(diag(vcov_itt_cons))[2], 
+                    sqrt(diag(vcov_itt_prof))[2]),
+          digits = 1,
           type = "text",
-          
-          # Notas adicionales
-          add.lines = list(
-            c("Compliance Rate", "", "7.4%", "", "7.4%"),
-            c("Factor Amplificación", "", paste0(round(late_cons_coef/itt_cons_coef,2), "x"), 
-              "", paste0(round(late_prof_coef/itt_prof_coef, 2), "x")),
-            c("Errores clustereados", "Área", "Área", "Área", "Área")
-          ),
-          
-          notes = c("Errores estándar clustereados por área en paréntesis.",
-                   "ITT: Intent-to-Treat. LATE: Local Average Treatment Effect."),
-          notes.align = "l")
+          font.size = "small",
+          notes = "Errores estándar clustereados por área.")
 
 ```
+```{r warning=FALSE, message=FALSE}
+# Crear tabla de resultados combinados ITT y LATE
+# Tabla LATE
+stargazer(late_consumption, late_profit,
+          title = "Efectos Local Average Treatment (LATE)",
+          dep.var.labels = c("Consumo Total", "Ganancias Negocio"),
+          keep = "anymfi_1",
+          covariate.labels = "Any MFI",
+          se = list(sqrt(diag(vcov_late_cons))[2], 
+                    sqrt(diag(vcov_late_prof))[2]),
+          digits = 1,
+          type = "text",
+          font.size = "small",
+          add.lines = list(c("Compliance Rate", "7.4\\%", "7.4\\%")),
+          notes = "Errores estándar clustereados por área.")
+
+```
+
 **Interpretación de Resultados:** En términos practicos el efecto ITT indica que el acceso al microcredito en una zona que facilita el credito (Zona Tratada), es independiente de si el hogar efectivamente tome el credito. La interpretacion cuantitativa del ITT, presenta un aumento a consumir en promedio 38 rupias mensuales. Además, puede facilitar un aumento en las ganancias del negocio en 585 rupias mensuales en promedio debido al acceso al microcrédito. Sin embargo, ambos resultados no son estadisticamente significativos, resultados que coinciden con los autores.
 
 De otro lado, el efecto LATE bajo condiciones de aleatoriedad estima que tomar un microcrédito aumenta el consumo en 460 rupias mensuales en promedio y aumenta las ganancias del negocio en 6585 rupias mensuales en promedio. Por lo tanto, el LATE mide el efecto causal de tomar el credito solo para aquellos "compliers". Es decir, aquellos hogares que toman el MFI porque su acceso fue facilitado por la asignación aleatoría.
@@ -349,7 +357,7 @@ De otro lado, el efecto LATE bajo condiciones de aleatoriedad estima que tomar u
 c)	¿Cuál debería ser la relación matemática entre la tasa de cumplimiento, el LATE y el ITT? ¿Parece mantenerse esta relación en sus resultados? En una tabla presente sus cálculos de LATE matemáticos/manuales y discuta. 
 
 **Respuesta:**
-```{r}
+```{r warning=FALSE, message=FALSE}
 
 #Importante: LATE = ITT / Compliance Rate
 
@@ -380,4 +388,4 @@ tabla_verificacion <- data.frame(
 
 head(tabla_verificacion)
 ```
-**Interpretació:** Los resultado confirman la relación matemática $LATE = ITT / Compliance Rate$. Sin embargo, las diferencias indican que el efector del muestreo y los pesos pueden afectar las estimaciones por OLS y VI. Además, las observaciones de LATE VI son menos para el consumo total. En general, se puede concluir que el Microcredito tiene efectos causales (LATE) grandes pero solo para una minoria de hogares como lo muestra el compliance rate bajo.
+**Interpretación:** Los resultado confirman la relación matemática $LATE = ITT / Compliance Rate$. Sin embargo, las diferencias indican que el efector del muestreo y los pesos pueden afectar las estimaciones por OLS y VI. Además, las observaciones de LATE VI son menos para el consumo total. En general, se puede concluir que el Microcredito tiene efectos causales (LATE) grandes pero solo para una minoria de hogares como lo muestra el compliance rate bajo.
