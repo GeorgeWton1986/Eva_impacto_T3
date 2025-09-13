@@ -1,10 +1,10 @@
 ---
-title: "EVALUACIÓN DE IMPACTO - TALLER 2"
+title: "EVALUACIÓN DE IMPACTO - TALLER 3"
 author: "VIÁFARA MORALES, JORGE ELIECER"
 date: "2025-09-13"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 ---
 
@@ -80,13 +80,16 @@ rm(list = ls())
 #Incluir las librerias
 if(!require(pacman)) install.packages("pacman") ; require(pacman)
 p_load(haven,   #Leer archivos .dta
-        dplyr,   #Manipular datos
-        stargazer,  #Visualizar tablas de regresión
-        fixest,  #Calcular los efectos fijos
-        plm,  #Datos de panel
-       knitr,   #Visualizar tablas adicionales
-       ivreg,  #Regresiones por variables instrumentales
-       broom #Extraer resultados de regresiones
+      dplyr,    #Manipular datos
+      stargazer,  #Visualizar tablas de regresión
+      fixest,   #Calcular los efectos fijos
+      plm,  #Datos de panel
+      knitr,   #Visualizar tablas adicionales
+      ivreg,  #Regresiones por variables instrumentales
+      broom, #Extraer resultados de regresiones
+      AER,    #Regresiones por variables instrumentales
+      sandwich, #Errores estándar robustos
+      lmtest  #Pruebas estadísticas
       )
 ```
 
@@ -113,7 +116,7 @@ el1_data <- BD_0 %>% filter(sample1 == 1)
 #Verificar que tenemos los datos correctos
 cat("Observaciones en endline 1:", nrow(el1_data), "\n")
 
-#Variables de control especificadas en el taller
+#Variables de control especificadas
 controls_formula <- "area_pop_base + area_business_total_base + area_exp_pc_mean_base + area_literate_head_base + area_literate_base + area_debt_total_base"
 
 #Regresión Tabla 2 columna 1 spandana_1
@@ -137,7 +140,7 @@ coef_mod_3 <- round(coef(mod_3)["treatment"], 3)
 se_mod_3 <- round(se(mod_3)["treatment"], 3)
 pval_mod_3 <- round(pvalue(mod_3)["treatment"], 3)
 
-# Crear tabla de resultados
+#Crear tabla de resultados
 results_1_3 <- data.frame(
   Variable = c("Spandana (Columna 1)", "Any MFI (Columna 3)"),
   Coeficiente = c(coef_mod_1, coef_mod_3),
@@ -146,7 +149,7 @@ results_1_3 <- data.frame(
   Observaciones = c(nobs(mod_1), nobs(mod_3))
 )
 
-# Mostrar tabla
+#Mostrar tabla
 cat("\n=== RESULTADOS PREGUNTA 2b ===\n")
 print(results_1_3)
 
@@ -165,48 +168,32 @@ etable(mod_1, mod_3,
 
 c)	Replique la tabla 3 panel A, columnas  3 y 4. Explique la intuición detrás de los resultados. Recuerde incluir la corrección por sobremuestreo y errores cluster a nivel de área.
 
-**Respuesta:**
+**Respuesta:** La tabla 3 panel A, presenta los resultados de la primera encuesta Endline 1. Los datos representan los impactos de acceso al microcrédito en emprendimientos.
 ```{r}
-
-# Función para calcular errores estándar clusterizados
-cluster_se <- function(model, cluster_var) {
-  require(sandwich)
-  require(lmtest)
-  vcov_cluster <- vcovCL(model, cluster = cluster_var)
-  coeftest(model, vcov = vcov_cluster)
-}
+#Variables de control especificadas
+controls_formula_1 <- "area_pop_base + area_business_total_base + area_exp_pc_mean_base + area_literate_head_base + area_literate_base"
 
 #Regresión Tabla 3 Expenses Columna 3
-mod_3_3 <- lm(bizexpense_1 ~ treatment + area_pop_base + area_business_total_base + 
-                   area_exp_pc_mean_base + area_literate_head_base + 
-                   area_literate_base, 
-                   data = el1_data, 
-                  weights = el1_data$w1)
+mod_3_3 <- feols(as.formula(paste("bizexpense_1 ~ treatment+", controls_formula_1)), 
+               data = el1_data, 
+               weights = ~w1, 
+               cluster = ~areaid)
 
 #Regresión Tabla 3 profit Columna 4
-mod_3_4 <- lm(bizprofit_1 ~ treatment + area_pop_base + area_business_total_base + 
-                 area_exp_pc_mean_base + area_literate_head_base + 
-                 area_literate_base, 
-                 data = el1_data, 
-                weights = el1_data$w1)
+mod_3_4 <- feols(as.formula(paste("bizprofit_1 ~ treatment+", controls_formula_1)), 
+               data = el1_data, 
+               weights = ~w1, 
+               cluster = ~areaid)
 
-#Errores clustereados
-results_expenses <- cluster_se(mod_3_3, el1_data$areaid)
-results_profit <- cluster_se(mod_3_4, el1_data$areaid)
-
-round(results_expenses[2,], 4)
-round(results_profit[2,], 4)
-
-#Extraer información de manera organizada
+#Extraer coeficientes y errores estándar con 4 cifras significativas
 coef_expenses <- round(coef(mod_3_3)["treatment"], 4)
-se_expenses <- round(sqrt(diag(vcovCL(mod_3_3, cluster = el1_data$areaid)))["treatment"], 4)
-pval_expenses <- round(results_expenses[2,4], 4)
+se_expenses <- round(se(mod_3_3)["treatment"], 4)
+pval_expenses <- round(pvalue(mod_3_3)["treatment"], 4)
 
 coef_profit <- round(coef(mod_3_4)["treatment"], 4)
-se_profit <- round(sqrt(diag(vcovCL(mod_3_4, cluster = el1_data$areaid)))["treatment"], 4)
-pval_profit <- round(results_profit[2,4], 4)
+se_profit <- round(se(mod_3_4)["treatment"], 4)
+pval_profit <- round(pvalue(mod_3_4)["treatment"], 4)
 
-#Tabla de resultados
 results_2c <- data.frame(
   Variable = c("Gastos Negocio (Col 3)", "Ganancias Negocio (Col 4)"),
   Coeficiente = c(coef_expenses, coef_profit),
@@ -218,13 +205,41 @@ results_2c <- data.frame(
 cat("\n=== RESULTADOS PREGUNTA 2c ===\n")
 print(results_2c)
 
+#Mostrar tabla
+
+etable(mod_3_3, mod_3_4,
+       title = "Tabla 3, Panel A - Actividades de Autoempleo",
+       headers = c("Gastos (Col 3)", "Ganancias (Col 4)"),
+       keep = "treatment",
+       digits = 4)
+
 ```
 
+**Intuición sobre los resultados (Expenses):** El resultado de la varible área tratada indica la diferencia promedio los gastos promedios mensuales de los negocios entre los tratados y el area de control. La significancia estadistica sugiere que la variable que el microcrédito no tuvo un impacto en los gastos de los negocios. Es decir, los hogares gastaron 216 rupias más que los hogares en la areas de control.
+
+**Intuición sobre los resultados (Profit):** La utilidad de los negocios de los hogares en las áreas tratadas represento un cambio de 377 rupias en comparación a aquellos hogares en el areas de control. Sin embargo, la significancia estadística indica que no es significante. Por lo tanto, Las utilidades de los negocios no representan expancion de oportunidades para los negocios, debido a que el consumo total promedio de los hogares es aproximadamente 6.500 rupias al mes.
+
+**En conclusión:** La primera encuenta Endline 1, no presenta evidencia sobre el impacto estadisticos significativo de acceso al microcrédito por lo hogares en los gastos y utilidades de los negocios.
 
 d)	Usando “any MFI” como definición del tratamiento y “Treated Area” como asignación aleatoria inicial, calcule la tasa de cumplimiento (compliance rate).  ¿Parece ser alta o baja? (Nota: incluya el ajuste para sobremuestreo)
 
-**Respuesta:**
+**Respuesta:** La relación de cumplimiento (compliance rate) esta midiendo la efectividad del experimiento en terminos de la diferencias entre $compliance = P(tomar MFI | área tratada) - P(tomar MFI | área control)$. Se explica como la fracción adicional de hogares que tomaron los microcreditos dado que estan tratados. Por lo tanto, si la relación de cumplimiento es cercano a 1, significa que casi todos los hogares en las áreas tratadas tomaron microcréditos, mientras que si es cercano a 0, indica que el experimento tuvo poco impacto en la toma de microcréditos.
 
+```{r}
+#Calcular tasa de cumplimiento
+compliance_rate_df <- el1_data %>%
+  summarise(
+    #Proporción que toma MFI en áreas tratadas
+    treated_take_mfi = weighted.mean(anymfi_1[treatment == 1], w1[treatment == 1], na.rm = TRUE),
+    #Proporción que toma MFI en áreas control  
+    control_take_mfi = weighted.mean(anymfi_1[treatment == 0], w1[treatment == 0], na.rm = TRUE),
+    #Tasa de cumplimiento = diferencia
+    compliance = treated_take_mfi - control_take_mfi
+  )
+cat("\n=== Tasa de Cumplimiento ===\n")
+print(compliance_rate_df)
+```
+Según los resultados, la tasa de cumpliento es de 0.074 o 7.4%, representa un valor bajo. Esto se interpreta como solo 7 hogares de 100 obtuvieron acceso a microcréditos debido al experimento. Además, 18.1% de los hogares de las areas de control obtuvieron MFI de otras fuentes y el 25.5% tomaron prestamos de MFI. 
 
 ## Tercer Punto
 
@@ -238,15 +253,131 @@ Finalmente, no incluya ningún control en sus estimaciones.
 
 ### Solución tercer Punto
 
-a)	a)	¿Cuáles son los supuestos necesarios para que los estimadores de VI sean válidos (en el contexto del artículo)?
+a) ¿Cuáles son los supuestos necesarios para que los estimadores de VI sean válidos (en el contexto del artículo)?
 
-**Respuesta:**
+**Respuesta:** Los supuestos necesesarios para que los estimadores de VI sean validos son, i) Relevancia del instrumento $Cov(anymfi_1,treatment)\neq 0 $, ii) Exclusión $Cov(\epsilon, treatment) = 0 $, iii) Monotonicidad $anymfi_1(1) \geq anymfi_1(0)$ y iv) Independencia $treatment \perp (anymfi_1(0), anymfi_1(1), \epsilon)$.
 
 b)	Para cada una de las dos variables, estime el efecto Local Average Treament Effect (LATE) de obtener un préstamo, a través del método de Variable Instrumental. Estime también el ITT.  Para cada tipo de efecto (LATE e ITT) presente una tabla con sus estimaciones y sus respectivos errores estándar. Interprete sus resultados, ¿Cuál es la diferencia en la interpretación de los dos tipos de efecto? Discuta. (Nota: no incluya controles, solo ajuste para sobremuestreo y clusterice errores.)
 
-**Respuesta:**
+**Respuesta:** Vamos a explicar los terminos ITT (Intent to Treat), es el efecto de ser asignado al tratamiento, independiente si se recibe el tratamiento. El LATE (Local Average Treatment Effect), es el efecto causal del tratamiento en aquellos que cumplen con el tratamiento debido a la asignación aleatoria.
+```{r}
+
+#i) ITT - Consumo Total
+itt_consumption <- lm(total_exp_mo_pc_1 ~ treatment, 
+                      data = el1_data, 
+                      weights = el1_data$w1)
+
+#i) ATE - Consumo Total (IV)
+late_consumption <- ivreg(total_exp_mo_pc_1 ~ anymfi_1 | treatment, 
+                          data = el1_data, 
+                          weights = el1_data$w1)
+
+#ii) ITT - Ganancias Negocio
+itt_profit <- lm(bizprofit_2 ~ treatment, 
+                 data = el1_data, 
+                 weights = el1_data$w1)
+
+#ii) LATE - Ganancias Negocio (IV)
+late_profit <- ivreg(bizprofit_2 ~ anymfi_1 | treatment, 
+                     data = el1_data, 
+                     weights = el1_data$w1)
+
+#Errores clustereados para ITT
+vcov_itt_cons <- vcovCL(itt_consumption, cluster = el1_data$areaid)
+vcov_itt_prof <- vcovCL(itt_profit, cluster = el1_data$areaid)
+
+#Errores clustereados para LATE
+vcov_late_cons <- vcovCL(late_consumption, cluster = el1_data$areaid)
+vcov_late_prof <- vcovCL(late_profit, cluster = el1_data$areaid)
+
+
+#ITT Coeficentes y Desv. Estandasr Consumo Total
+itt_cons_coef <- coef(itt_consumption)["treatment"]
+itt_cons_se <- sqrt(diag(vcov_itt_cons))["treatment"]
+
+#LATE Coeficentes y Desv. Estandasr Consumo Total (IV)
+late_cons_coef <- coef(late_consumption)["anymfi_1"]
+late_cons_se <- sqrt(diag(vcov_late_cons))["anymfi_1"]
+
+#ITT Coeficentes y Desv. Estandasr Ganancias Negocio
+itt_prof_coef <- coef(itt_profit)["treatment"] 
+itt_prof_se <- sqrt(diag(vcov_itt_prof))["treatment"]
+
+#LATE Coeficentes y Desv. Estandasr Ganancias Negocio (IV)
+late_prof_coef <- coef(late_profit)["anymfi_1"]
+late_prof_se <- sqrt(diag(vcov_late_prof))["anymfi_1"]
+
+
+# Crear tabla de resultados combinados ITT y LATE
+stargazer(itt_consumption, late_consumption, itt_profit, late_profit,
+          title = "Comparación ITT vs LATE",
+          dep.var.labels = c("Consumo Total", "Ganancias Negocio"),
+          column.labels = c("ITT", "LATE", "ITT", "LATE"),
+          model.numbers = FALSE,
+          
+          # Incluir solo el coeficiente de interés
+          keep = c("treatment", "anymfi_1"),
+          covariate.labels = c("Treatment (ITT)", "Any MFI (LATE)"),
+          
+          # Errores estándar clustereados
+          se = list(sqrt(diag(vcov_itt_cons))[2],     # ITT consumo
+                    sqrt(diag(vcov_late_cons))[2],    # LATE consumo  
+                    sqrt(diag(vcov_itt_prof))[2],     # ITT ganancias
+                    sqrt(diag(vcov_late_prof))[2]),   # LATE ganancias
+          
+          # Formato
+          digits = 2,
+          type = "text",
+          
+          # Notas adicionales
+          add.lines = list(
+            c("Compliance Rate", "", "7.4%", "", "7.4%"),
+            c("Factor Amplificación", "", paste0(round(late_cons_coef/itt_cons_coef,2), "x"), 
+              "", paste0(round(late_prof_coef/itt_prof_coef, 2), "x")),
+            c("Errores clustereados", "Área", "Área", "Área", "Área")
+          ),
+          
+          notes = c("Errores estándar clustereados por área en paréntesis.",
+                   "ITT: Intent-to-Treat. LATE: Local Average Treatment Effect."),
+          notes.align = "l")
+
+```
+**Interpretación de Resultados:** En términos practicos el efecto ITT indica que el acceso al microcredito en una zona que facilita el credito (Zona Tratada), es independiente de si el hogar efectivamente tome el credito. La interpretacion cuantitativa del ITT, presenta un aumento a consumir en promedio 38 rupias mensuales. Además, puede facilitar un aumento en las ganancias del negocio en 585 rupias mensuales en promedio debido al acceso al microcrédito. Sin embargo, ambos resultados no son estadisticamente significativos, resultados que coinciden con los autores.
+
+De otro lado, el efecto LATE bajo condiciones de aleatoriedad estima que tomar un microcrédito aumenta el consumo en 460 rupias mensuales en promedio y aumenta las ganancias del negocio en 6585 rupias mensuales en promedio. Por lo tanto, el LATE mide el efecto causal de tomar el credito solo para aquellos "compliers". Es decir, aquellos hogares que toman el MFI porque su acceso fue facilitado por la asignación aleatoría.
 
 c)	¿Cuál debería ser la relación matemática entre la tasa de cumplimiento, el LATE y el ITT? ¿Parece mantenerse esta relación en sus resultados? En una tabla presente sus cálculos de LATE matemáticos/manuales y discuta. 
 
 **Respuesta:**
+```{r}
 
+#Importante: LATE = ITT / Compliance Rate
+
+compliance_rate <- compliance_rate_df$compliance
+
+# Calcular LATE "manual" usando la fórmula
+late_manual_consumo <- itt_cons_coef / compliance_rate
+late_manual_ganancias <- itt_prof_coef / compliance_rate
+
+# Crear tabla de verificación
+tabla_verificacion <- data.frame(
+  Variable = c("Consumo Total", "Ganancias Negocio"),
+  
+  ITT = c(round(itt_cons_coef, 2), round(itt_prof_coef, 2)),
+  
+  Compliance_Rate = c(round(compliance_rate, 4), round(compliance_rate, 4)),
+  
+  LATE_IV = c(round(late_cons_coef, 2), round(late_prof_coef, 2)),
+  
+  LATE_Manual = c(round(late_manual_consumo, 2), round(late_manual_ganancias, 2)),
+  
+  Diferencia = c(round(late_cons_coef - late_manual_consumo, 2),
+                 round(late_prof_coef - late_manual_ganancias, 2)),
+  
+  Ratio_LATE_ITT = c(round(late_cons_coef / itt_cons_coef, 2),
+                     round(late_prof_coef / itt_prof_coef, 2))
+)
+
+head(tabla_verificacion)
+```
+**Interpretació:** Los resultado confirman la relación matemática $LATE = ITT / Compliance Rate$. Sin embargo, las diferencias indican que el efector del muestreo y los pesos pueden afectar las estimaciones por OLS y VI. Además, las observaciones de LATE VI son menos para el consumo total. En general, se puede concluir que el Microcredito tiene efectos causales (LATE) grandes pero solo para una minoria de hogares como lo muestra el compliance rate bajo.
