@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.9.5)  12 SEP 2025 21:28
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.9.5)  12 SEP 2025 21:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -603,7 +603,7 @@ Here is how much of TeX's memory you used:
  14 hyphenation exceptions out of 8191
  89i,8n,93p,444b,619s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/jorgeviafara/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on Taller_3_github_V1.pdf (11 pages, 286696 bytes).
+Output written on Taller_3_github_V1.pdf (11 pages, 286670 bytes).
 PDF statistics:
  184 PDF objects out of 1000 (max. 8388607)
  144 compressed objects within 2 object streams
